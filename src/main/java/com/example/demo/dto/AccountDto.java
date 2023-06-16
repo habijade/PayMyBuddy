@@ -1,17 +1,20 @@
 package com.example.demo.dto;
 
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountDtp {
+public class AccountDto {
     @NotEmpty(message = "Bank name must not be empty")
     private String name;
 
-    private String iban;
+    private Integer iban;
+
+    private BigDecimal fee;
 }
