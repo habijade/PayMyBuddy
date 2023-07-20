@@ -14,7 +14,7 @@
 <div th:insert="header :: header"></div>
 
 <h1 class="text-center">Transfer</h1>
-<form action="/transfer" method="post" th:object="${transferDto}">
+<form action="/transaction" method="post" th:object="${transactionDto}">
     <div class="mb-3">
         <label for="amount" class="form-label">Amount</label>
         <input type="number" class="form-control" id="amount" name="amount" min="0.01" step="0.01" required>

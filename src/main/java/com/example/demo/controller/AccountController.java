@@ -84,9 +84,13 @@ public class AccountController {
     }
 
     @PostMapping("/bank/withdraw")
-    public String withdrawAmount(@RequestParam("withdrawAmount") Double withdrawAmount,
+    public String withdrawAmount(@RequestParam("withdrawAmount") Double withdrawAmount, @ModelAttribute("accountDto") AccountDto accountDto,
                                  Model model) {
         accountService.withdrawAccount(withdrawAmount);
+        User user = userService.getLoggedUser();
+        Account account = accountService.getBankAccountInformation(user.getId());
+        model.addAttribute("user", user);
+        model.addAttribute("account", account);
         return "bank";
     }
 

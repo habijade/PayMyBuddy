@@ -27,7 +27,7 @@ public class TransactionController {
     @Autowired
     private TransactionService transactionService;
 
-    @GetMapping("/transfer")
+    @GetMapping("/transaction")
     public String showTransferForm(Model model) {
         User user = userService.getLoggedUser();
         Long userId = user.getId();
@@ -36,17 +36,22 @@ public class TransactionController {
         model.addAttribute("connections", connections);
 
         TransactionDto transferDto = new TransactionDto();
-        model.addAttribute("transferDto", transferDto);
+        model.addAttribute("transactionDto", transferDto);
         List<TransactionDto> transactionList = transactionService.getTransactionHistoryForUser(userId);
         model.addAttribute("transactionHistory", transactionList);
 
-        return "transfer";
+        return "transaction";
     }
 
-    @PostMapping("/transfer")
-    public String transferAmount(@ModelAttribute("transferDto") TransactionDto transferDto, Model model) {
+    @PostMapping("/transaction")
+    public String transferAmount(@ModelAttribute("transactionDto") TransactionDto transferDto, Model model) {
+        User user = userService.getLoggedUser();
+        Long userId = user.getId();
+        List<TransactionDto> transactionList = transactionService.getTransactionHistoryForUser(userId);
         transactionService.transferAmount(transferDto.getRecipientEmail(), transferDto.getDescription(), transferDto.getAmount());
-        return "transfer";
+        model.addAttribute("transactionHistory", transactionList);
+
+        return "transaction";
     }
 
 }

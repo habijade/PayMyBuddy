@@ -118,11 +118,20 @@ public class AccountServiceImpl implements AccountService {
     public ResultWithdrawAccount withdrawAccount(Double amount) {
         ResultWithdrawAccount resultWithdrawAccount = new ResultWithdrawAccount();
         User user = userService.getLoggedUser();
+        Long userId = user.getId();
         if (user != null) {
+            Account account = getBankAccountInformation(userId);
             Double balance = user.getBalance();
+            Double accountBalance = account.getBalance();
             if (balance != null && balance >= amount) {
+
                 Double updatedBalance = balance - amount;
+                Double updateAccountBalance = accountBalance + amount;
                 user.setBalance(updatedBalance);
+                account.setBalance(updateAccountBalance);
+                userService.saveUser(user);
+                accountRepository.save(account);
+
                 resultWithdrawAccount.setMessage("Withdrawal successful");
                 resultWithdrawAccount.setResult(true);
             } else {
