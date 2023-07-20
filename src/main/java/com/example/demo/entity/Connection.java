@@ -1,9 +1,6 @@
 package com.example.demo.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,13 +9,16 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
+@IdClass(ConnectionId.class)
 @Table(name = "connections")
 public class Connection {
     @Id
     @Column(name = "user_id")
     private Long userId;
-
     @Id
     @Column(name = "connected_user_id")
     private Long connectedUserId;
+
+        public Connection() {
+    }
 }

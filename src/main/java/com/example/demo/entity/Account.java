@@ -1,7 +1,6 @@
 package com.example.demo.entity;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +10,6 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
-@AllArgsConstructor
 @Table(name = "accounts")
 public class Account {
     @Id
@@ -20,14 +18,23 @@ public class Account {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @Column(name = "account_balance")
-    private BigDecimal accountBalance;
     @Temporal(TemporalType.DATE)
     private Date date;
     private String description;
-
-    private BigDecimal fee;
+    private Double balance;
     private int iban;
     private String name;
+
+    public Account() {
+    }
+
+    public Account(User user, Date date, String description, Double balance, int iban, String name) {
+        this.user = user;
+        this.date = date;
+        this.description = description;
+        this.balance = balance;
+        this.iban = iban;
+        this.name = name;
+    }
 
 }

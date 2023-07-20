@@ -15,7 +15,9 @@ public interface ConnectionRepository extends JpaRepository<Connection, Long> {
     List<Connection> findAllConnectionByUserId(Long userId);
 
     @Modifying
-    @Query(value = "DELETE FROM connections c WHERE c.userId = :userId AND c.connectedUserId = :connectedUserId")
+    @Query(value = "DELETE FROM Connection c WHERE c.userId = :userId AND c.connectedUserId = :connectedUserId")
     void deleteByUserIdAndConnectedUserId(@Param("userId") Long userId, @Param("connectedUserId") Long connectedUserId);
+
+    Connection save(Connection connection);
 
 }

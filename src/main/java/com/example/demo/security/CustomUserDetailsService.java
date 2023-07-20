@@ -4,14 +4,14 @@ import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -29,12 +29,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("User " + username + " not found");
         }
-        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), getGrantedAuthorities(user));
+        return user;
 
     }
+
     private List<GrantedAuthority> getGrantedAuthorities(User user) {
-    List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-    authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
-    return authorities;
-}
+        return Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
+    }
 }
