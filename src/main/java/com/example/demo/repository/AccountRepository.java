@@ -13,13 +13,12 @@ import java.math.BigDecimal;
 public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Account findByUserId(Long userId);
-    Account findByIban(int iban);
+    Account findByIban(String iban);
     @Modifying
     @Query(value = "DELETE FROM Account a WHERE a.user.id = :userId")
     void deleteByUserIdQuery(@Param("userId") Long userId);
 
 
     boolean existsByUserId(Long userId);
-    long countByIban(int iban);
 
 }

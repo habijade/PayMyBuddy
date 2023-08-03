@@ -19,7 +19,7 @@ public interface AccountService {
 
     public boolean checkIfUserAccountExists(Long userId);
 
-    public boolean checkIfIbanExists(int iban);
+    public boolean checkIfIbanExists(String iban);
     public ResultDebitAccount debitAccount(Double amount);
     public ResultWithdrawAccount withdrawAccount(Double amount);
 

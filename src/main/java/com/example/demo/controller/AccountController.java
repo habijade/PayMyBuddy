@@ -1,8 +1,11 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.AccountDto;
+import com.example.demo.dto.WithdrawDto;
 import com.example.demo.entity.Account;
 import com.example.demo.entity.User;
+import com.example.demo.model.ResultDebitAccount;
+import com.example.demo.model.ResultWithdrawAccount;
 import com.example.demo.service.AccountService;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.validation.Valid;
-import java.math.BigDecimal;
 
 @Controller
 public class AccountController {
@@ -31,7 +33,7 @@ public class AccountController {
         User user = userService.getLoggedUser();
         Long userId = user.getId();
 
-        if(user.getBalance() == null){
+        if (user.getBalance() == null) {
             user.setBalance(0.0);
         }
 
@@ -41,10 +43,11 @@ public class AccountController {
         }
 
         AccountDto accountDto = new AccountDto();
+        WithdrawDto withdrawDto = new WithdrawDto();
         model.addAttribute("accountDto", accountDto);
+        model.addAttribute("withdrawDto", withdrawDto);
 
-        model.addAttribute("user", user); // Ajouter l'utilisateur au modèle
-
+        updateUserInfo(model);
         return "bank";
     }
 
@@ -80,29 +83,44 @@ public class AccountController {
 
         accountService.saveBankAccountInformation(account);
         model.addAttribute("account", account);
+        updateUserInfo(model);
         return "redirect:/bank?success";
     }
 
     @PostMapping("/bank/withdraw")
     public String withdrawAmount(@RequestParam("withdrawAmount") Double withdrawAmount, @ModelAttribute("accountDto") AccountDto accountDto,
                                  Model model) {
-        accountService.withdrawAccount(withdrawAmount);
+        ResultWithdrawAccount resultWithdrawAccount = accountService.withdrawAccount(withdrawAmount);
         User user = userService.getLoggedUser();
         Account account = accountService.getBankAccountInformation(user.getId());
-        model.addAttribute("user", user);
         model.addAttribute("account", account);
+        updateUserInfo(model);
+
+        if (!resultWithdrawAccount.isResult()) {
+            model.addAttribute("errorMessage", "Insufficient funds");
+        } else {
+            model.addAttribute("successMessage", "Withdrawal successful");
+        }
+
         return "bank";
     }
 
 
     @PostMapping("/bank/deposit")
-    public String depositAmount(@RequestParam("depositAmount") Double depositAmount,@ModelAttribute("accountDto") AccountDto accountDto,
+    public String depositAmount(@RequestParam("depositAmount") Double depositAmount, @ModelAttribute("accountDto") AccountDto accountDto,
                                 Model model) {
-        accountService.debitAccount(depositAmount);
+        ResultDebitAccount resultDebitAccount = accountService.debitAccount(depositAmount);
         User user = userService.getLoggedUser();
         Account account = accountService.getBankAccountInformation(user.getId());
-        model.addAttribute("user", user);
         model.addAttribute("account", account);
+        updateUserInfo(model);
+
+        if (!resultDebitAccount.isResult()) {
+            model.addAttribute("errorMessage", "Insufficient funds in the virtual account");
+        } else {
+            model.addAttribute("successMessage", "Deposit successful");// Redirect to the bank page to avoid resubmitting the form
+        }
+
         return "bank";
     }
 
@@ -124,7 +142,6 @@ public class AccountController {
     public String showEditAccountForm(Model model) {
         User user = userService.getLoggedUser();
         Long userId = user.getId();
-
         if (accountService.checkIfUserAccountExists(userId)) {
             Account account = accountService.getBankAccountInformation(userId);
             AccountDto accountDto = new AccountDto();
@@ -138,21 +155,29 @@ public class AccountController {
     }
 
     @PostMapping("/bank/update-iban")
-    public String updateIban(@RequestParam("iban") int newIban, Model model) {
+    public String updateIban(@RequestParam("iban") String newIban, Model model) {
         User user = userService.getLoggedUser();
         Long userId = user.getId();
+        Account account = accountService.getBankAccountInformation(userId);
+        model.addAttribute("account", account);
 
-        if (!accountService.checkIfUserAccountExists(userId)) {
+        if (!accountService.checkIfIbanExists(newIban)) {
+            account.setIban(newIban);
+
+            accountService.saveBankAccountInformation(account);
+
+            model.addAttribute("successMessage", "IBAN updated successfully");
+        } else {
             throw new IllegalArgumentException("There is no existing account for this user");
         }
 
-        Account account = accountService.getBankAccountInformation(userId);
-        account.setIban(newIban);
-
-        accountService.saveBankAccountInformation(account);
-        model.addAttribute("account", account);
-        model.addAttribute("successMessage", "IBAN updated successfully");
         return "redirect:/bank";
     }
 
+    private void updateUserInfo(Model model) {
+        User user = userService.getLoggedUser();
+        model.addAttribute("balance", user.getBalance());
+        model.addAttribute("name", user.getName());
+        model.addAttribute("user", user);
+    }
 }

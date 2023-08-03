@@ -72,7 +72,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public boolean checkIfIbanExists(int iban) {
+    public boolean checkIfIbanExists(String iban) {
         Account existingAccount = accountRepository.findByIban(iban);
         return existingAccount != null;
     }
@@ -87,19 +87,19 @@ public class AccountServiceImpl implements AccountService {
             Account account = getBankAccountInformation(userId);
             if (account != null) {
                 Double currentBalance = account.getBalance();
-                if (currentBalance.compareTo(amount) < 0) {
+                if (balance.compareTo(amount) < 0) {
                     resultDebitAccount.setMessage("Insufficient funds in the virtual account");
                     resultDebitAccount.setResult(false);
                     return resultDebitAccount;
                 }
-                Double updatedBalanceAccount = currentBalance - amount;
-                account.setBalance(updatedBalanceAccount);
+                Double updatedBalance = balance - amount;
+                Double updateAccountBalance = currentBalance + amount;
+                account.setBalance(updateAccountBalance);
                 accountRepository.save(account);
 
                 if (balance == null) {
                     balance = 0.0;
                 }
-                Double updatedBalance = balance + amount;
                 user.setBalance(updatedBalance);
                 userService.saveUser(user);
                 resultDebitAccount.setMessage("Deposit successful");
@@ -123,19 +123,16 @@ public class AccountServiceImpl implements AccountService {
             Account account = getBankAccountInformation(userId);
             Double balance = user.getBalance();
             Double accountBalance = account.getBalance();
-            if (balance != null && balance >= amount) {
+            if (balance != null && accountBalance >= amount) {
 
-                Double updatedBalance = balance - amount;
-                Double updateAccountBalance = accountBalance + amount;
-                user.setBalance(updatedBalance);
+                Double updateAccountBalance = accountBalance - amount;
+                Double updateBalance = balance + amount;
+                user.setBalance(updateBalance);
                 account.setBalance(updateAccountBalance);
                 userService.saveUser(user);
                 accountRepository.save(account);
-
-                resultWithdrawAccount.setMessage("Withdrawal successful");
                 resultWithdrawAccount.setResult(true);
             } else {
-                resultWithdrawAccount.setMessage("Insufficient funds");
                 resultWithdrawAccount.setResult(false);
             }
         }

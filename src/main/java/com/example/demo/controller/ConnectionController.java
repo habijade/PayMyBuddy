@@ -31,8 +31,17 @@ public class ConnectionController {
         model.addAttribute("connectionDto", connectionDto);
         User user = userService.getLoggedUser();
         Long userId = user.getId();
+        String name = user.getName();
+        Double balance = user.getBalance();
+
+        if (user.getBalance() == null) {
+            user.setBalance(0.0);
+        }
+
         List<UserDto> friends = connectionService.getFriends(userId);
         model.addAttribute("friends", friends);
+        model.addAttribute("balance", balance);
+        model.addAttribute("name", name);
         return "connection";
     }
 
@@ -40,6 +49,14 @@ public class ConnectionController {
     public String addUser(@ModelAttribute("userDto") UserDto userDto, Model model) {
         User user = userService.getLoggedUser();
         Long userId = user.getId();
+        String name = user.getName();
+        Double balance = user.getBalance();
+
+        if (user.getBalance() == null) {
+            user.setBalance(0.0);
+        }
+        model.addAttribute("balance", balance);
+        model.addAttribute("name", name);
         User existingUser = userService.findUserByEmail(userDto.getEmail());
         if (existingUser == null) {
             model.addAttribute("errorMessage", "User not found");
@@ -73,6 +90,14 @@ public class ConnectionController {
     public String deleteFriend(@RequestParam("friendId") Long friendId, Model model) {
         User user = userService.getLoggedUser();
         Long userId = user.getId();
+        String name = user.getName();
+        Double balance = user.getBalance();
+
+        if (user.getBalance() == null) {
+            user.setBalance(0.0);
+        }
+        model.addAttribute("balance", balance);
+        model.addAttribute("name", name);
 
         try {
             connectionService.deleteFriend(userId, friendId);

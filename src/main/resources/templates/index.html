@@ -12,13 +12,90 @@
 
 <body>
 <div th:insert="header :: header"></div>
-
+<!-- Send Money Section -->
 <div class="container">
-    <div class="row">
-        <h1 class="text-center"> Registration and Login System </h1>
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <span th:text="${errorMessage}"></span>
     </div>
-    <div class="row">
-        <h2 class="text-center">Balance: <span th:text="${balance}">0.00</span></h2>
+    <!-- Send Money Section -->
+    <div  th:if="${#lists.isEmpty(connections)}" >
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="card">
+                    <h5 class="card-header">Add a connection</h5>
+                    <div class="card-body">
+                        To get started and make your first payment, you must add your buddies on the connections page.
+                        <br>
+                        <button style="background-color: #77BF63; border-color: #77BF63" class="btn btn-primary buddy-btn-green float-end" href="/connection">
+                            Bring me there
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(connections)}">
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="card">
+                    <h5 class="card-header">Send money to a buddy</h5>
+                    <div class="card-body">
+                        <form action="/" method="post" th:object="${transactionDto}">
+                            <div class="row">
+                                <div class="col-6">
+                                    <label for="amount" class="form-label">Amount</label>
+                                    <input type="number" class="form-control" id="amount" name="amount" min="0.01"
+                                           step="0.01" required>
+                                    <!-- Error message for invalid amount -->
+                                    <div th:if="${transactionDto.amount > balance}" class="text-danger">
+                                        The amount must be within your available balance.
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <label for="recipientEmail" class="form-label">Recipient Email</label>
+                                    <input type="email" class="form-control" id="recipientEmail" name="recipientEmail"
+                                           required>
+                                </div>
+                                <div class="col-1">
+                                    <button style="background-color: #77BF63; border-color: #77BF63" type="submit"
+                                            class="btn btn-primary">Transfer money
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div th:if="${transactions}" class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <h5 class="card-header">My transactions</h5>
+            <div class="card-body">
+                <div class="row">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th class="col-2 text-center">Amount (€)</th>
+                            <th class="col-4 text-center">Description</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="transaction : ${transactions}">
+                            <td class="text-center" th:text="${transaction.amount}"></td>
+                            <td class="text-center" th:text="${transaction.description}"></td>
+                            <!-- Add more columns as needed for transaction details -->
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 </body>

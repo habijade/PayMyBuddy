@@ -27,14 +27,11 @@ public class ConnectionServiceImpl implements ConnectionService {
 
     @Override
     public boolean addFriend(Long userId, String buddyEmail) throws IllegalArgumentException {
-        // Vérifier si l'email saisi existe dans la base de données
         if (userService.isAnExistingEmail(buddyEmail)) {
             Long buddyId = userService.findUserByEmail(buddyEmail).getId();
 
-            // Assurer que l'utilisateur ne peut pas s'ajouter lui-même
             if (!userId.equals(buddyId)) {
 
-                // Vérifi si la connexion n'a pas déjà été faite
                 if (!areFriend(userId, buddyId)) {
                     Connection connection = new Connection(userId, buddyId);
                     connectionRepository.save(connection);

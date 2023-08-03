@@ -14,82 +14,113 @@
 <div th:insert="header :: header"></div>
 
 <div class="container">
-    <div th:if="${account}">
-        <hr>
-        <h2>Account Details</h2>
-        <p>Name: <span th:text="${account.name}"></span></p>
-        <p>IBAN: <span th:text="${account.iban}"></span></p>
-        <p>Balance: <span th:text="${account.balance}"></span></p>
-        <p>Description: <span th:text="${account.description}"></span></p>
-        <!-- Delete Account Button -->
-        <form action="/bank/delete" method="post">
-            <input type="hidden" name="accountId" th:value="${account.id}">
-            <button type="submit" class="btn btn-danger">Delete Account</button>
-        </form>
-        <h2>Withdraw / Deposit</h2>
-        <h2>Virtual Account Balance</h2>
-        <p>Current Balance: <span th:text="${user.balance}"></span></p>
-        <form action="/bank/withdraw" method="post">
-            <div class="mb-3">
-                <label for="withdrawAmount" class="form-label">Withdraw Amount from Virtual Account</label>
-                <input type="number" class="form-control" id="withdrawAmount" name="withdrawAmount" min="1"
-                       placeholder="1.00" step="0.01">
-            </div>
-            <button type="submit" class="btn btn-primary">Withdraw</button>
-        </form>
-        <br>
-        <form action="/bank/deposit" method="post">
-            <div class="mb-3">
-                <label for="depositAmount" class="form-label">Deposit Amount to Virtual Account</label>
-                <input type="number" class="form-control" id="depositAmount" name="depositAmount" min="1"
-                       th:max="${user.balance}" placeholder="1.00" step="0.01">
-            </div>
-            <button type="submit" class="btn btn-primary">Deposit</button>
-        </form>
-        <br>
-        <h2>Edit Account</h2>
-        <form action="/bank/update-iban" method="post" th:object="${accountDto}">
-            <div class="mb-3">
-                <label for="iban" class="form-label">New IBAN</label>
-                <input type="text" class="form-control" id="iban" th:field="*{iban}"
-                       th:classappend="${#fields.hasErrors('iban')} ? 'is-invalid'">>
-                <div th:if="${#fields.hasErrors('iban')}" th:errors="*{iban}" class="invalid-feedback"></div>
-            </div>
-            <button type="submit" class="btn btn-primary">Update IBAN</button>
-        </form>
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <span th:text="${errorMessage}"></span>
     </div>
-    <div th:unless="${account}">
-        <div class="row">
-            <h1 class="text-center">Add Account</h1>
-            <form action="/bank" method="post" th:object="${accountDto}" th:action="@{/bank}">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Name</label>
-                    <input type="text" class="form-control" id="name" th:field="*{name}">
-                    <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="invalid-feedback"></div>
+    <div th:if="${successMessage}" class="alert alert-success mt-3">
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${account}">
+        <div class="row mt-2">
+            <div class="col-6">
+                <form action="/bank" method="post" th:object="${accountDto}" th:action="@{/bank}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Bank Name</label>
+                        <input type="text" class="form-control" id="name" th:value="${account.name}" readonly>
+                        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="invalid-feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="iban" class="form-label">IBAN<br><small class="fst-italic">Must have at least 14
+                            characters and maximum 34 </small></label>
+                        <input type="text" class="form-control" id="iban" th:value="${account.iban}" readonly>
+                        <div th:if="${#fields.hasErrors('iban')}" th:errors="*{iban}" class="invalid-feedback">
+                        </div>
+                        <div class="d-flex">
+
+                            <form action="/bank/update-iban" method="post" th:object="${accountDto}">
+                                <input type="hidden" class="form-control" id="iban" th:field="*{iban}">
+                                <button style="background-color: #77BF63; border-color: #77BF63" type="submit"
+                                        class="btn btn-primary">Update IBAN
+                                </button>
+                            </form>
+                            <form action="/bank/delete" method="post">
+                                <input type="hidden" name="accountId" th:value="${account.id}">
+                                <button type="submit" style="" class="btn btn-danger">Delete Account</button>
+                            </form>
+                        </div>
+
+                </form>
+            </div>
+        </div>
+
+        <div class="offset-1 col-5">
+            <div class="mt-2 card">
+                <h5 class="card-header">Withdraw money from bank account</h5>
+                <div class="card-body">
+                    <form th:action="@{/bank/withdraw}" method="post">
+                        <div class="mb-3">
+                            <label for="withdrawAmount" class="form-label">Amount to withdraw (€) :</label>
+                            <input type="number" class="form-control" id="withdrawAmount" name="withdrawAmount" min="1"
+                             placeholder="1.00" step="0.01">
+                            <button style="background-color: #77BF63; border-color: #77BF63; margin-top:10px" type="submit" class="btn btn-primary">Withdraw</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="mb-3">
-                    <label for="iban" class="form-label">IBAN</label>
-                    <input type="number" class="form-control" id="iban" th:field="*{iban}"
-                           th:classappend="${#fields.hasErrors('iban')} ? 'is-invalid'">
-                    <div th:if="${#fields.hasErrors('iban')}" th:errors="*{iban}" class="invalid-feedback">
-                    </div>
-                    <div class="mb-3">
-                        <label for="balance" class="form-label">Balance</label>
-                        <input type="number" class="form-control" id="balance" th:field="*{balance}">
-                        <div th:if="${#fields.hasErrors('balance')}" th:errors="*{balance}"
-                             class="invalid-feedback"></div>
-                    </div>
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <textarea class="form-control" id="description" th:field="*{description}"></textarea>
-                        <div th:if="${#fields.hasErrors('description')}" th:errors="*{description}"
-                             class="invalid-feedback"></div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Account</button>
-            </form>
+            </div>
+            <div class="mt-2 card">
+                <h5 class="card-header">Deposit money to bank account</h5>
+                <div class="card-body">
+                    <form action="/bank/deposit" method="post">
+                        <div class="mb-3">
+                            <label for="depositAmount" class="form-label">Amount to deposit (€) :</label>
+                            <input type="number" class="form-control" id="depositAmount" name="depositAmount" min="1"
+                                   placeholder="1.00" step="0.01">
+                            <button style="background-color: #77BF63; border-color: #77BF63; margin-top:10px" type="submit" class="btn btn-primary">Deposit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+
+    <div th:unless="${account}">
+        <div class="row mt-2">
+            <div class="col-6">
+                <form action="/bank" method="post" th:object="${accountDto}" th:action="@{/bank}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Bank Name</label>
+                        <input type="text" class="form-control" id="name" th:field="*{name}">
+                        <div th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="invalid-feedback"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="iban" class="form-label">IBAN<br><small class="fst-italic">Must have at least 14
+                            characters and maximum 34 </small></label>
+                        <input type="text" class="form-control" id="iban" th:field="*{iban}"
+                               th:classappend="${#fields.hasErrors('iban')} ? 'is-invalid'">
+                        <div th:if="${#fields.hasErrors('iban')}" th:errors="*{iban}" class="invalid-feedback">
+                        </div>
+                        <div class="mb-3" style="margin-top:10px">
+                            <button style="background-color: #77BF63; border-color: #77BF63" type="submit"
+                                    class="btn btn-primary">Add Account
+                            </button>
+                        </div>
+                </form>
+            </div>
+        </div>
+        <div class="offset-1 col-5">
+            <div class="card-body">
+                <!-- Getting started -->
+                <h5 class="card-header">Getting started</h5>
+                <div class="card-body">
+                    <p class="card-text"><strong>In order to get started and withdraw (or deposit) money from your bank
+                        account, you must fill the form with your bank credentials.</strong><br>
+                        After that, you will be able to make transactions with others users using your balance.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
 </body>
 
 </html>

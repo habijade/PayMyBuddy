@@ -17,37 +17,56 @@
     <div th:if="${errorMessage}" class="alert alert-danger">
         <span th:text="${errorMessage}"></span>
     </div>
-    <div class="row">
-        <h1 class="text-center">Add User</h1>
-        <form action="/connection" method="post">
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" required>
+
+    <div class="row mt-2">
+
+        <div class="mt-2 col-7">
+            <div th:if="${friends}">
+                <table th:each="friend : ${friends}" class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th>Email</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr >
+                        <td class="col-3" th:text="${friend.email}"></td>
+                        <td class="text-center col-3">
+                            <form th:action="@{/connection/delete}" method="post">
+                                <input type="hidden" name="friendId" th:value="${friend.id}" />
+                                <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
-            <button type="submit" class="btn btn-primary">Add User</button>
-        </form>
-        <div class="mt-4">
-            <h2 class="text-center">Friend List</h2>
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th>Email</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="friend : ${friends}">
-                    <td th:text="${friend.email}"></td>
-                    <td>
-                        <form th:action="@{/connection/delete}" method="post">
-                            <input type="hidden" name="friendId" th:value="${friend.id}"/>
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
+
+
+            <div th:if="${#lists.isEmpty(friends)}" style="text-align: center">
+                Start by adding your buddies with the "Add a buddy" form.
+            </div>
         </div>
+
+
+        <div class="col-5">
+            <div class="mt-2 card">
+                <h5 class="card-header">Add a buddy</h5>
+                <div class="card-body">
+                    <form action="/connection" method="post">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <button style="background-color: #77BF63; border-color: #77BF63" type="submit" class="btn btn-primary">Add User</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
     </div>
+
 </div>
 </body>
 
