@@ -36,15 +36,15 @@
         <tr>
             <th scope="col">Description</th>
             <th scope="col">Amount</th>
-            <!-- Add more columns as needed for transaction details -->
+            <th scope="col">Type</th>
         </tr>
         </thead>
         <tbody>
-        <!-- Iterate over the transactionHistory list and display each transaction -->
         <tr th:each="transaction : ${transactionHistory}">
-            <td th:text="${transaction.description}"></td>
             <td th:text="${transaction.amount}"></td>
-            <!-- Add more columns as needed for transaction details -->
+            <td th:text="${transaction.description}"></td>
+            <td th:text="${transaction.description}"></td>
+
         </tr>
         </tbody>
     </table>

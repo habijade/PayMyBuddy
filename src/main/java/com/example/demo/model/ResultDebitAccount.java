@@ -4,10 +4,13 @@ import lombok.Data;
 
 @Data
 public class ResultDebitAccount {
+
+    private String message;
+    private boolean result;
+
     public String getMessage() {
         return message;
     }
-
     public void setMessage(String message) {
         this.message = message;
     }
@@ -20,6 +23,4 @@ public class ResultDebitAccount {
         this.result = result;
     }
 
-    private String message;
-    private boolean result;
 }

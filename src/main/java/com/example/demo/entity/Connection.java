@@ -12,6 +12,7 @@ import lombok.Setter;
 @IdClass(ConnectionId.class)
 @Table(name = "connections")
 public class Connection {
+
     @Id
     @Column(name = "user_id")
     private Long userId;
@@ -20,5 +21,21 @@ public class Connection {
     private Long connectedUserId;
 
         public Connection() {
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    public Long getConnectedUserId() {
+        return connectedUserId;
+    }
+
+    public void setConnectedUserId(Long connectedUserId) {
+        this.connectedUserId = connectedUserId;
     }
 }

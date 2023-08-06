@@ -17,8 +17,11 @@
     <div th:if="${errorMessage}" class="alert alert-danger">
         <span th:text="${errorMessage}"></span>
     </div>
+    <div th:if="${successMessage}" class="alert alert-success mt-3">
+        <span th:text="${successMessage}"></span>
+    </div>
     <!-- Send Money Section -->
-    <div  th:if="${#lists.isEmpty(connections)}" >
+    <div th:if="${#lists.isEmpty(connections)}">
         <div class="row mt-2">
             <div class="col-12">
                 <div class="card">
@@ -26,7 +29,8 @@
                     <div class="card-body">
                         To get started and make your first payment, you must add your buddies on the connections page.
                         <br>
-                        <button style="background-color: #77BF63; border-color: #77BF63" class="btn btn-primary buddy-btn-green float-end" href="/connection">
+                        <button style="background-color: #77BF63; border-color: #77BF63"
+                                class="btn btn-primary buddy-btn-green float-end" href="/connection">
                             Bring me there
                         </button>
                     </div>
@@ -47,14 +51,14 @@
                                     <label for="amount" class="form-label">Amount</label>
                                     <input type="number" class="form-control" id="amount" name="amount" min="0.01"
                                            step="0.01" required>
-                                    <!-- Error message for invalid amount -->
                                     <div th:if="${transactionDto.amount > balance}" class="text-danger">
                                         The amount must be within your available balance.
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <label for="recipientEmail" class="form-label">Recipient Email</label>
-                                    <input type="email" class="form-control" id="recipientEmail" name="recipientEmail"
+                                    <input type="email" class="form-control" id="recipientEmail"
+                                           th:field="*{recipientEmail}"
                                            required>
                                 </div>
                                 <div class="col-1">
@@ -83,13 +87,19 @@
                         <tr>
                             <th class="col-2 text-center">Amount (€)</th>
                             <th class="col-4 text-center">Description</th>
+                            <th class="col-4 text-center">Connection</th>
+                            <th class="col-4 text-center">Date</th>
+                            <th class="col-4 text-center">Type</th>
                         </tr>
                         </thead>
                         <tbody>
                         <tr th:each="transaction : ${transactions}">
                             <td class="text-center" th:text="${transaction.amount}"></td>
                             <td class="text-center" th:text="${transaction.description}"></td>
-                            <!-- Add more columns as needed for transaction details -->
+                            <td class="text-center" th:text="${transaction.recipientEmail}"></td>
+                            <td class="text-center" th:text="${transaction.date}"></td>
+                            <td class="text-center" th:text="${transaction.type}"></td>
+
                         </tr>
                         </tbody>
                     </table>

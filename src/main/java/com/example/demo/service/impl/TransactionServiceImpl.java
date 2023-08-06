@@ -49,14 +49,11 @@ public class TransactionServiceImpl implements TransactionService {
             return resultTransactions;
         }
 
-        //calcul du prélèvement
         Double fee = (transferAmount * 0.5 / 100);
-        //déduction du prélèvement du montant transféré
         transferAmount = transferAmount - fee;
 
         userSender.setBalance(senderBalance - transferAmount);
 
-        // Check if the recipient's balance is null
         if (recipient.getBalance() == null) {
             recipient.setBalance(transferAmount);
         } else {
@@ -90,20 +87,32 @@ public class TransactionServiceImpl implements TransactionService {
         List<TransactionDto> transactionDtoList = new ArrayList<>();
 
         for (Transaction transaction : sentTransactions) {
+            Long reveiverId = transaction.getReceiverId();
+            User reveiver = userService.findUserById(reveiverId);
+            String receiverEmail = reveiver.getEmail();
+
             TransactionDto transactionDto = new TransactionDto();
             transactionDto.setAmount(transaction.getAmount());
             transactionDto.setDescription(transaction.getDescription());
-            // Set other properties as needed
-
+            transactionDto.setDate(transaction.getDate());
+            transactionDto.setReceiverId(transaction.getReceiverId());
+            transactionDto.setSenderId(transaction.getSenderId());
+            transactionDto.setRecipientEmail(receiverEmail);
             transactionDtoList.add(transactionDto);
         }
 
         for (Transaction transaction : receivedTransactions) {
+            Long senderId = transaction.getSenderId();
+            User sender = userService.findUserById(senderId);
+            String senderEmail = sender.getEmail();
+
             TransactionDto transactionDto = new TransactionDto();
             transactionDto.setAmount(transaction.getAmount());
             transactionDto.setDescription(transaction.getDescription());
-            // Set other properties as needed
-
+            transactionDto.setReceiverId(transaction.getReceiverId());
+            transactionDto.setSenderId(transaction.getSenderId());
+            transactionDto.setDate(transaction.getDate());
+            transactionDto.setRecipientEmail(senderEmail);
             transactionDtoList.add(transactionDto);
         }
 
