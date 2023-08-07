@@ -23,8 +23,8 @@ PaymyBuddy représente une plateforme web dédié au transfert d'argent entre se
 
 ## Instalation 🛠️
 
-1. Cloner le débot sur votre environnement
-2. Configurer une base de données :
+1. Cloner le dépot sur votre environnement
+2. Configurez une base de données :
    - Créez une base de donnés MySQL nommée paymybuddy
    - Importer le schema de la base de donnée avec le fichier : schema.sql
    - Mettez à jour les informations de connexion à la base de données dans src/main/resources/application.properties
