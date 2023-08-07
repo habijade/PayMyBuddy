@@ -13,7 +13,7 @@ PaymyBuddy représente une plateforme web dédié au transfert d'argent entre se
 - Du coté Front, la conception a été réalisé en utilisant Thymeleaf et Bootstrap
 - Comme base de donné l'application s'appuie sur MySQL
 
-  ## Fonctionnalités
+## Fonctionnalités
   - Inscription et authentification des utilisateurs
   - Ajout de contacts d'amis
   - Effectuer des transfert d'argent entre amis
@@ -25,10 +25,16 @@ PaymyBuddy représente une plateforme web dédié au transfert d'argent entre se
 
 1. Cloner le débot sur votre environnement
 2. Configurer une base de données :
-   . Créez une base de donnés MySQL nommée paymybuddy
-   . 
-   . Mettez à jour les informations de connexion à la base de données dans src/main/resources/application.properties
+   - Créez une base de donnés MySQL nommée paymybuddy
+   - Importer le schema de la base de donnée avec le fichier : schema.sql
+   - Mettez à jour les informations de connexion à la base de données dans src/main/resources/application.properties
 
+## Utilisation
+- Accédez à l'application via l'adresse : http://localhost:8080
+- Inscrivez-vous en tant qu'utilisateur et connectez-vous.
+- Ajoutez des amis en utilisant leurs adresses e-mail
+- Effectuez des transferts d'argent entre amis.
+- Consultez l'historique des transactions pour suivre vos activités.
 
 
     
