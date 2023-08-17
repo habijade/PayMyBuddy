@@ -10,11 +10,13 @@ import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
@@ -50,14 +52,14 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         Double fee = (transferAmount * 0.5 / 100);
-        transferAmount = transferAmount - fee;
+        transferAmount = transferAmount + fee;
 
         userSender.setBalance(senderBalance - transferAmount);
 
         if (recipient.getBalance() == null) {
             recipient.setBalance(transferAmount);
         } else {
-            recipient.setBalance(recipient.getBalance() + transferAmount);
+            recipient.setBalance(recipient.getBalance() + (transferAmount - fee));
         }
 
         userService.saveUser(userSender);
