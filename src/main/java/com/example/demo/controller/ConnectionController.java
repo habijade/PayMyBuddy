@@ -8,10 +8,7 @@ import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -29,85 +26,73 @@ public class ConnectionController {
     public String getConnectionPage(Model model) {
         ConnectionDto connectionDto = new ConnectionDto();
         model.addAttribute("connectionDto", connectionDto);
+
         User user = userService.getLoggedUser();
-        Long userId = user.getId();
-        String name = user.getName();
-        Double balance = user.getBalance();
+        populateUserInfo(user, model);
 
-        if (user.getBalance() == null) {
-            user.setBalance(0.0);
-        }
-
-        List<UserDto> friends = connectionService.getFriends(userId);
+        List<UserDto> friends = connectionService.getFriends(user.getId());
         model.addAttribute("friends", friends);
-        model.addAttribute("balance", balance);
-        model.addAttribute("name", name);
+
         return "connection";
     }
 
     @PostMapping("/connection")
     public String addUser(@ModelAttribute("userDto") UserDto userDto, Model model) {
         User user = userService.getLoggedUser();
-        Long userId = user.getId();
-        String name = user.getName();
-        Double balance = user.getBalance();
+        populateUserInfo(user, model);
+
+        User existingUser = userService.findUserByEmail(userDto.getEmail());
+        if (existingUser == null) {
+            model.addAttribute("errorMessage", "User not found");
+            return refreshConnectionPage(user, model);
+        }
 
         if (user.getBalance() == null) {
             user.setBalance(0.0);
         }
-        model.addAttribute("balance", balance);
-        model.addAttribute("name", name);
-        User existingUser = userService.findUserByEmail(userDto.getEmail());
-        if (existingUser == null) {
-            model.addAttribute("errorMessage", "User not found");
-            List<UserDto> friends = connectionService.getFriends(userId);
-            model.addAttribute("friends", friends);
-            return "connection";
-        }
 
-        boolean isAlreadyFriend = connectionService.areFriend(userId, existingUser.getId());
+        boolean isAlreadyFriend = connectionService.areFriend(user.getId(), existingUser.getId());
         if (isAlreadyFriend) {
             model.addAttribute("errorMessage", "You are already connected with this user");
-            List<UserDto> friends = connectionService.getFriends(userId);
-            model.addAttribute("friends", friends);
-            return "connection";
+            return refreshConnectionPage(user, model);
         }
 
         try {
-            connectionService.addFriend(userId, existingUser.getEmail());
+            connectionService.addFriend(user.getId(), existingUser.getEmail());
         } catch (IllegalArgumentException e) {
             return "redirect:/error";
         }
 
-        List<UserDto> friends = connectionService.getFriends(userId);
-
-        model.addAttribute("friends", friends);
-        return "connection";
+        return "redirect:/connection";
     }
 
     @PostMapping("/connection/delete")
     @Transactional
     public String deleteFriend(@RequestParam("friendId") Long friendId, Model model) {
         User user = userService.getLoggedUser();
-        Long userId = user.getId();
-        String name = user.getName();
-        Double balance = user.getBalance();
-
-        if (user.getBalance() == null) {
-            user.setBalance(0.0);
-        }
-        model.addAttribute("balance", balance);
-        model.addAttribute("name", name);
+        populateUserInfo(user, model);
 
         try {
-            connectionService.deleteFriend(userId, friendId);
+            connectionService.deleteFriend(user.getId(), friendId);
         } catch (IllegalArgumentException e) {
             return "redirect:/error";
         }
 
-        List<UserDto> friends = connectionService.getFriends(userId);
+        return refreshConnectionPage(user, model);
+    }
+
+    private void populateUserInfo(User user, Model model) {
+        Long userId = user.getId();
+        String name = user.getName();
+        Double balance = (user.getBalance() != null) ? user.getBalance() : 0.0;
+
+        model.addAttribute("balance", balance);
+        model.addAttribute("name", name);
+    }
+
+    private String refreshConnectionPage(User user, Model model) {
+        List<UserDto> friends = connectionService.getFriends(user.getId());
         model.addAttribute("friends", friends);
         return "connection";
     }
-
 }

@@ -18,7 +18,24 @@ public class Account {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+    @Temporal(TemporalType.DATE)
+    private Date date;
+    private String description;
+    private Double balance;
+    private String iban;
+    private String name;
 
+    public Account() {
+    }
+
+    public Account(User user, Date date, String description, Double balance, String iban, String name) {
+        this.user = user;
+        this.date = date;
+        this.description = description;
+        this.balance = balance;
+        this.iban = iban;
+        this.name = name;
+    }
     public Long getId() {
         return id;
     }
@@ -75,23 +92,5 @@ public class Account {
         this.name = name;
     }
 
-    @Temporal(TemporalType.DATE)
-    private Date date;
-    private String description;
-    private Double balance;
-    private String iban;
-    private String name;
-
-    public Account() {
-    }
-
-    public Account(User user, Date date, String description, Double balance, String iban, String name) {
-        this.user = user;
-        this.date = date;
-        this.description = description;
-        this.balance = balance;
-        this.iban = iban;
-        this.name = name;
-    }
 
 }

@@ -23,12 +23,6 @@
         <div class="mt-2 col-7">
             <div th:if="${friends}">
                 <table th:each="friend : ${friends}" class="table table-bordered">
-                    <thead>
-                    <tr>
-                        <th>Email</th>
-                        <th></th>
-                    </tr>
-                    </thead>
                     <tbody>
                     <tr >
                         <td class="col-3" th:text="${friend.email}"></td>

@@ -8,7 +8,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@AllArgsConstructor
+//@AllArgsConstructor
 @IdClass(ConnectionId.class)
 @Table(name = "connections")
 public class Connection {
@@ -21,6 +21,11 @@ public class Connection {
     private Long connectedUserId;
 
         public Connection() {
+    }
+
+    public Connection(Long userId, Long buddyId) {
+            this.userId = userId;
+            this.connectedUserId = buddyId;
     }
 
     public Long getUserId() {

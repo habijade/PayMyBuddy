@@ -22,4 +22,5 @@ public class ResultWithdrawAccount {
     public void setResult(boolean result) {
         this.result = result;
     }
+
 }
