@@ -4,16 +4,17 @@ import com.example.demo.dto.AccountDto;
 import com.example.demo.entity.Account;
 import com.example.demo.entity.User;
 import com.example.demo.model.ResultDebitAccount;
+import com.example.demo.model.ResultUpdateAccount;
 import com.example.demo.model.ResultWithdrawAccount;
 import com.example.demo.repository.AccountRepository;
 import com.example.demo.service.AccountService;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class AccountServiceImpl implements AccountService {
 
     @Autowired
@@ -33,7 +34,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public boolean saveBankAccountInformation(Account accountEntity) {
         if (accountEntity != null) {
-
             accountRepository.save(accountEntity);
             return true;
         } else {
@@ -82,6 +82,9 @@ public class AccountServiceImpl implements AccountService {
         ResultDebitAccount resultDebitAccount = new ResultDebitAccount();
         User user = userService.getLoggedUser();
         Long userId = user.getId();
+        if (user.getBalance() == null) {
+            user.setBalance(0.0);
+        }
         if (user != null) {
             Double balance = user.getBalance();
             Account account = getBankAccountInformation(userId);
@@ -119,6 +122,9 @@ public class AccountServiceImpl implements AccountService {
         ResultWithdrawAccount resultWithdrawAccount = new ResultWithdrawAccount();
         User user = userService.getLoggedUser();
         Long userId = user.getId();
+        if (user.getBalance() == null) {
+            user.setBalance(0.0);
+        }
         if (user != null) {
             Account account = getBankAccountInformation(userId);
             Double balance = user.getBalance();
@@ -138,4 +144,22 @@ public class AccountServiceImpl implements AccountService {
         }
         return resultWithdrawAccount;
     }
+
+    @Override
+    public ResultUpdateAccount updateIban(Long userId, String newIban) {
+        ResultUpdateAccount resultUpdateAccount = new ResultUpdateAccount();
+        if(!checkIfIbanExists(newIban)){
+            Account account = accountRepository.findByUserId(userId);
+            account.setIban(newIban);
+            accountRepository.save(account);
+            resultUpdateAccount.setResult(true);
+            resultUpdateAccount.setMessage("Your iban has been changed");
+            return resultUpdateAccount;
+        }else{
+            resultUpdateAccount.setResult(false);
+            resultUpdateAccount.setMessage("IBAN already exists. Please enter a different IBAN.");
+        }
+        return resultUpdateAccount;
+    }
 }
+

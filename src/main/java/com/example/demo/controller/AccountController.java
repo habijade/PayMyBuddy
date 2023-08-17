@@ -5,6 +5,7 @@ import com.example.demo.dto.WithdrawDto;
 import com.example.demo.entity.Account;
 import com.example.demo.entity.User;
 import com.example.demo.model.ResultDebitAccount;
+import com.example.demo.model.ResultUpdateAccount;
 import com.example.demo.model.ResultWithdrawAccount;
 import com.example.demo.service.AccountService;
 import com.example.demo.service.UserService;
@@ -27,26 +28,12 @@ public class AccountController {
     @Autowired
     private UserService userService;
 
-
     @GetMapping("/bank")
-    public String showAddAccountForm(Model model) {
+    public String showBankPage(Model model) {
         User user = userService.getLoggedUser();
-        Long userId = user.getId();
-
-        if (user.getBalance() == null) {
-            user.setBalance(0.0);
-        }
-
-        if (accountService.checkIfUserAccountExists(userId)) {
-            Account account = accountService.getBankAccountInformation(userId);
-            model.addAttribute("account", account);
-        }
-
-        AccountDto accountDto = new AccountDto();
-        WithdrawDto withdrawDto = new WithdrawDto();
-        model.addAttribute("accountDto", accountDto);
-        model.addAttribute("withdrawDto", withdrawDto);
-
+        prepareAccountInfo(user, model);
+        model.addAttribute("accountDto", new AccountDto());
+        model.addAttribute("withdrawDto", new WithdrawDto());
         updateUserInfo(model);
         return "bank";
     }
@@ -57,10 +44,9 @@ public class AccountController {
                              Model model) {
         User user = userService.getLoggedUser();
         Long userId = user.getId();
-
+        prepareAccountInfo(user, model);
         if (result.hasErrors()) {
-            model.addAttribute("accountDto", accountDto);
-            return "bank";
+            return showBankPage(model);
         }
 
         if (accountService.checkIfUserAccountExists(userId)) {
@@ -74,27 +60,20 @@ public class AccountController {
             model.addAttribute("accountDto", accountDto);
             return "bank";
         }
-        Account account = new Account();
-        account.setName(accountDto.getName());
-        account.setIban(accountDto.getIban());
-        account.setBalance(accountDto.getBalance());
-        account.setDescription(accountDto.getDescription());
-        account.setUser(user);
 
+        Account account = createAccount(accountDto, user);
         accountService.saveBankAccountInformation(account);
-        model.addAttribute("account", account);
-        updateUserInfo(model);
+
         return "redirect:/bank?success";
     }
 
     @PostMapping("/bank/withdraw")
-    public String withdrawAmount(@RequestParam("withdrawAmount") Double withdrawAmount, @ModelAttribute("accountDto") AccountDto accountDto,
+    public String withdrawAmount(@RequestParam("withdrawAmount") Double withdrawAmount,
+                                 @ModelAttribute("accountDto") AccountDto accountDto,
                                  Model model) {
-        ResultWithdrawAccount resultWithdrawAccount = accountService.withdrawAccount(withdrawAmount);
         User user = userService.getLoggedUser();
-        Account account = accountService.getBankAccountInformation(user.getId());
-        model.addAttribute("account", account);
-        updateUserInfo(model);
+        ResultWithdrawAccount resultWithdrawAccount = accountService.withdrawAccount(withdrawAmount);
+        prepareAccountInfo(user, model);
 
         if (!resultWithdrawAccount.isResult()) {
             model.addAttribute("errorMessage", "Insufficient funds");
@@ -105,21 +84,37 @@ public class AccountController {
         return "bank";
     }
 
-
     @PostMapping("/bank/deposit")
-    public String depositAmount(@RequestParam("depositAmount") Double depositAmount, @ModelAttribute("accountDto") AccountDto accountDto,
+    public String depositAmount(@RequestParam("depositAmount") Double depositAmount,
+                                @ModelAttribute("accountDto") AccountDto accountDto,
                                 Model model) {
-        ResultDebitAccount resultDebitAccount = accountService.debitAccount(depositAmount);
         User user = userService.getLoggedUser();
-        Account account = accountService.getBankAccountInformation(user.getId());
-        model.addAttribute("account", account);
-        updateUserInfo(model);
+        ResultDebitAccount resultDebitAccount = accountService.debitAccount(depositAmount);
+        prepareAccountInfo(user, model);
 
         if (!resultDebitAccount.isResult()) {
-            model.addAttribute("errorMessage", "Insufficient funds in the virtual account");
+            model.addAttribute("errorMessage", resultDebitAccount.getMessage());
         } else {
-            model.addAttribute("successMessage", "Deposit successful");// Redirect to the bank page to avoid resubmitting the form
+            model.addAttribute("successMessage", resultDebitAccount.getMessage());
         }
+
+        return "bank";
+    }
+
+    @PostMapping("/bank/update")
+    public String updateAccount(@ModelAttribute("accountDto") AccountDto accountDto,
+                                BindingResult result,
+                                Model model) {
+        User user = userService.getLoggedUser();
+        Long userId = user.getId();
+        ResultUpdateAccount resultUpdateAccount = accountService.updateIban(userId, accountDto.getIban());
+        prepareAccountInfo(user, model);
+        if (!resultUpdateAccount.isResult()) {
+            model.addAttribute("errorMessage", resultUpdateAccount.getMessage());
+        } else {
+            model.addAttribute("successMessage", resultUpdateAccount.getMessage());
+        }
+
 
         return "bank";
     }
@@ -138,40 +133,30 @@ public class AccountController {
         return "redirect:/bank";
     }
 
-    @GetMapping("/bank/edit")
-    public String showEditAccountForm(Model model) {
-        User user = userService.getLoggedUser();
+
+    private void prepareAccountInfo(User user, Model model) {
         Long userId = user.getId();
+
+        if (user.getBalance() == null) {
+            user.setBalance(0.0);
+        }
+
         if (accountService.checkIfUserAccountExists(userId)) {
             Account account = accountService.getBankAccountInformation(userId);
-            AccountDto accountDto = new AccountDto();
-            accountDto.setIban(account.getIban());
-            model.addAttribute("accountDto", accountDto);
-        } else {
-            throw new IllegalArgumentException("There is no existing account for this user");
+            model.addAttribute("account", account);
         }
 
-        return "bank";
+        updateUserInfo(model);
     }
 
-    @PostMapping("/bank/update-iban")
-    public String updateIban(@RequestParam("iban") String newIban, Model model) {
-        User user = userService.getLoggedUser();
-        Long userId = user.getId();
-        Account account = accountService.getBankAccountInformation(userId);
-        model.addAttribute("account", account);
-
-        if (!accountService.checkIfIbanExists(newIban)) {
-            account.setIban(newIban);
-
-            accountService.saveBankAccountInformation(account);
-
-            model.addAttribute("successMessage", "IBAN updated successfully");
-        } else {
-            throw new IllegalArgumentException("There is no existing account for this user");
-        }
-
-        return "redirect:/bank";
+    private Account createAccount(AccountDto accountDto, User user) {
+        Account account = new Account();
+        account.setName(accountDto.getName());
+        account.setIban(accountDto.getIban());
+        account.setBalance(accountDto.getBalance());
+        account.setDescription(accountDto.getDescription());
+        account.setUser(user);
+        return account;
     }
 
     private void updateUserInfo(Model model) {

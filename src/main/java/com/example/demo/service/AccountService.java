@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.dto.AccountDto;
 import com.example.demo.entity.Account;
 import com.example.demo.model.ResultDebitAccount;
+import com.example.demo.model.ResultUpdateAccount;
 import com.example.demo.model.ResultWithdrawAccount;
 
 import java.math.BigDecimal;
@@ -22,5 +23,8 @@ public interface AccountService {
     public boolean checkIfIbanExists(String iban);
     public ResultDebitAccount debitAccount(Double amount);
     public ResultWithdrawAccount withdrawAccount(Double amount);
+
+    public ResultUpdateAccount updateIban(Long userId, String iban);
+
 
 }
