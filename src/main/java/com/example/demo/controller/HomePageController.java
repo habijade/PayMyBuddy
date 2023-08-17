@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.TransactionDto;
 import com.example.demo.dto.UserDto;
 import com.example.demo.entity.User;
+import com.example.demo.model.ResultTransactions;
 import com.example.demo.service.ConnectionService;
 import com.example.demo.service.TransactionService;
 import com.example.demo.service.UserService;
@@ -27,63 +28,55 @@ public class HomePageController {
     @GetMapping("/")
     public String home(@ModelAttribute("userDto") UserDto userDto, Model model) {
         User user = userService.getLoggedUser();
-        Long userId = user.getId();
-        String name = user.getName();
-        Double balance = user.getBalance();
-
-        if (user.getBalance() == null) {
-            user.setBalance(0.0);
-        }
-
-        // Get the list of connections
-        List<UserDto> connections = connectionService.getFriends(userId);
-
-        TransactionDto transferDto = new TransactionDto();
-        List<TransactionDto> transactionDtoList = transactionService.getTransactionHistoryForUser(userId);
-        for (TransactionDto transactionDto : transactionDtoList) {
-            String type = getTransactionType(transactionDto);
-            transactionDto.setType(type);
-            String connection = transactionDto.getRecipientEmail();
-            transactionDto.setRecipientEmail(connection);
-        }
-
-        model.addAttribute("balance", balance);
-        model.addAttribute("name", name);
-        model.addAttribute("userDto", userDto);
-        if (connections != null) {
-            model.addAttribute("connections", true);
-        } else {
-            model.addAttribute("connections", false);
-        }
-        model.addAttribute("transactionDto", transferDto);
-        model.addAttribute("transactions", transactionDtoList);
-
+        populateUserModel(user, userDto, model);
+        processIndexData(model, user);
         return "index";
     }
 
     @PostMapping("/")
-    public String transferAmount(@ModelAttribute("transactionDto") TransactionDto transferDto, @ModelAttribute("userDto") UserDto userDto, Model model) {
+    public String transferAmount(@ModelAttribute("transactionDto") TransactionDto transferDto,
+                                 @ModelAttribute("userDto") UserDto userDto, Model model) {
         User user = userService.getLoggedUser();
-        Long userId = user.getId();
-        String name = user.getName();
-        Double balance = user.getBalance();
-        model.addAttribute("userDto", userDto);
-        List<UserDto> connections = connectionService.getFriends(userId);
-        List<TransactionDto> transactionList = transactionService.getTransactionHistoryForUser(userId);
+        populateUserModel(user, userDto, model);
+
+        List<UserDto> connections = connectionService.getFriends(user.getId());
+        model.addAttribute("connections", !connections.isEmpty());
+
+        List<TransactionDto> transactionDtoList = transactionService.getTransactionHistoryForUser(user.getId());
+        processTransactionHistory(transactionDtoList);
+
+        model.addAttribute("transactions", transactionDtoList);
 
         User existingUser = userService.findUserByEmail(transferDto.getRecipientEmail());
-        model.addAttribute("connections", !connections.isEmpty());
-        model.addAttribute("transactions", transactionList);
-        model.addAttribute("balance", balance);
-        model.addAttribute("name", name);
+
 
         if (existingUser == null) {
             model.addAttribute("errorMessage", "User not found");
         } else {
-            transactionService.transferAmount(transferDto.getRecipientEmail(), transferDto.getDescription(), transferDto.getAmount());
-            model.addAttribute("successMessage", "the transfer was successful");
+            ResultTransactions resultTransactions = transactionService.transferAmount(transferDto.getRecipientEmail(), transferDto.getDescription(), transferDto.getAmount());
+            if (resultTransactions.isResult() == false) {
+                model.addAttribute("errorMessage", resultTransactions.getMessage());
+            } else {
+                model.addAttribute("successMessage", resultTransactions.getMessage());
+            }
         }
+
+        processIndexData(model, user);
         return "index";
+    }
+
+    private void populateUserModel(User user, UserDto userDto, Model model) {
+        model.addAttribute("balance", user.getBalance() != null ? user.getBalance() : 0.0);
+        model.addAttribute("name", user.getName());
+        model.addAttribute("userDto", userDto);
+    }
+
+    private void processTransactionHistory(List<TransactionDto> transactionDtoList) {
+        for (TransactionDto transactionDto : transactionDtoList) {
+            String type = getTransactionType(transactionDto);
+            transactionDto.setType(type);
+            transactionDto.setRecipientEmail(transactionDto.getRecipientEmail());
+        }
     }
 
     private String getTransactionType(TransactionDto transactionDto) {
@@ -97,5 +90,14 @@ public class HomePageController {
         }
     }
 
+    private void processIndexData(Model model, User user) {
+        List<UserDto> connections = connectionService.getFriends(user.getId());
+        model.addAttribute("connections", !connections.isEmpty());
 
+        List<TransactionDto> transactionDtoList = transactionService.getTransactionHistoryForUser(user.getId());
+        processTransactionHistory(transactionDtoList);
+
+        model.addAttribute("transactionDto", new TransactionDto());
+        model.addAttribute("transactions", transactionDtoList);
+    }
 }
