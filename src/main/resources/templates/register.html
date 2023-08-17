@@ -11,7 +11,7 @@
         crossorigin="anonymous">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
     <a class="navbar-brand" th:href="@{/index}">Registration and Login System</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -101,7 +101,7 @@
                th:if="${#fields.hasErrors('password')}"></p>
           </div>
           <div class="form-group">
-            <button class="btn btn-primary" type="submit">Register</button>
+            <button style="background-color: #77BF63; border-color: #77BF63"  class="btn btn-primary" type="submit">Register</button>
             <span>Already registered? <a th:href="@{/login}">Login here</a></span>
           </div>
         </form>
