@@ -32,7 +32,7 @@
                     <div class="mb-3">
                         <label for="iban" class="form-label">IBAN<br><small class="fst-italic">Must have at least 14
                             characters and maximum 34 </small></label>
-                        <input type="text" class="form-control" id="iban" th:field="*{iban}"
+                        <input type="text" class="form-control" id="iban" th:value="${accountDto.iban}" th:field="*{iban}"
                                th:classappend="${#fields.hasErrors('iban')} ? 'is-invalid'">
                         <div th:if="${#fields.hasErrors('iban')}" th:errors="*{iban}" class="invalid-feedback">
                         </div>

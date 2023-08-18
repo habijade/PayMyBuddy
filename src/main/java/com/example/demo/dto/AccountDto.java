@@ -1,15 +1,12 @@
 package com.example.demo.dto;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Data
 @AllArgsConstructor
@@ -17,6 +14,11 @@ import java.math.BigDecimal;
 public class AccountDto {
     @NotEmpty(message = "Bank name must not be empty")
     private String name;
+    @NotNull(message = "IBAN must not be null")
+    @Size(min = 1, message = "IBAN must not be empty")
+    private String iban;
+    private Double balance;
+    private String description;
 
     public String getName() {
         return name;
@@ -50,9 +52,4 @@ public class AccountDto {
         this.description = description;
     }
 
-    @NotNull(message = "IBAN must not be null")
-    @Size(min = 1, message = "IBAN must not be empty")
-    private String iban;
-    private Double balance;
-    private String description;
 }

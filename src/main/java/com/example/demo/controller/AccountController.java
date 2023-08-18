@@ -31,8 +31,13 @@ public class AccountController {
     @GetMapping("/bank")
     public String showBankPage(Model model) {
         User user = userService.getLoggedUser();
+        AccountDto accountDto = new AccountDto();
         prepareAccountInfo(user, model);
-        model.addAttribute("accountDto", new AccountDto());
+        Account account = accountService.getBankAccountInformation(user.getId());
+        if(account != null){
+            accountDto.setIban(account.getIban());
+        }
+        model.addAttribute("accountDto", accountDto);
         model.addAttribute("withdrawDto", new WithdrawDto());
         updateUserInfo(model);
         return "bank";
